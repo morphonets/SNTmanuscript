@@ -1,5 +1,7 @@
 This guide assumes the most recent version of Fiji is installed on the user’s computer and that the user is subscribed to the “Neuroanatomy” and “SciView” update sites.
+
 A system Java installation is also necessary for the DiademMetric.jar to be executed with Python's subprocess module.
+
 The steps in this guide are meant to be performed in the order presented.
 
 # Downloading the Olfactory Projection Fibers Dataset
@@ -15,7 +17,7 @@ The steps in this guide are meant to be performed in the order presented.
 
 At this point, the ```/.../FigS1_Hessian/``` directory structure (excluding files) should resemble:
 
-![alt text](./misc/dir_structure.png?raw=true)
+![alt text](./misc/dirstructure.png?raw=true)
 
 # Running generate_figure_data.py
 
