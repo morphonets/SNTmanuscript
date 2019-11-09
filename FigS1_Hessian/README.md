@@ -15,7 +15,7 @@ The steps in this guide are meant to be performed in the order presented.
 
 At this point, the ```/.../FigS1_Hessian/``` directory structure (excluding files) should resemble:
 
-![alt text](./README_Images/dir_structure.png?raw=true)
+![alt text](./misc/dir_structure.png?raw=true)
 
 # Running generate_figure_data.py
 
