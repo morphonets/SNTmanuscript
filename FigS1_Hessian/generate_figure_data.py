@@ -195,7 +195,7 @@ def auto_trace(image, ref_tree, sigma, maximum, use_hessian, out_dir):
     snt.dispose()
 
 
-def diadem(metric_dir, gold_standard, auto_traced, hessian=False):
+def diadem(metric_jar_path, gold_standard, auto_traced, hessian=False):
     """ Executes the Diadem Metric JAR as a child program in a new process.
     The Diadem score for the pair of reconstructions is taken from the output stream.
 
@@ -204,14 +204,13 @@ def diadem(metric_dir, gold_standard, auto_traced, hessian=False):
         (None, score) (tuple) if hessian == False
 
     Args:
-        metric_dir (str): The directory containing the Diadem Metric .JAR file.
+        metric_jar_path (str): The directory containing the Diadem Metric .JAR file.
         gold_standard (str): The filepath to the Gold Standard SWC.
         auto_traced (str): The filepath to the auto_traced SWC.
         hessian (bool): Whether or not to capture the sigma parameter from the auto_traced SWC filepath.
     """
 
-    metric_filepath = str(metric_dir) + '/DiademMetric.jar'
-    p = Popen(['java', '-jar', metric_filepath, '-G', gold_standard, '-T', auto_traced], stdout=PIPE, stderr=STDOUT)
+    p = Popen(['java', '-jar', metric_jar_path, '-G', gold_standard, '-T', auto_traced], stdout=PIPE, stderr=STDOUT)
 
     for line in p.stdout:
         score = float(line.strip().split()[1])
@@ -222,18 +221,17 @@ def diadem(metric_dir, gold_standard, auto_traced, hessian=False):
         m = re.search('sigma-(.+?)-', stripped)
         if m:
             sigma = float(m.group(1))
+            return (sigma, score)
 
         else:
             raise ValueError('No sigma captured for Hessian group tracing.')
-
-        return (sigma, score)
 
     else:
         # If not using the Hessian analysis, there is no sigma.
         return (None, score)
 
 
-def get_diadem_scores(metric_dir, gold_standard_dir, autotrace_dir, diadem_scores_dir):
+def get_diadem_scores(metric_jar_path, gold_standard_dir, autotrace_dir, diadem_scores_dir):
 
     # Get the filepaths of the scaled Gold Standard SWCs
     gold_standards = []
@@ -275,7 +273,7 @@ def get_diadem_scores(metric_dir, gold_standard_dir, autotrace_dir, diadem_score
             # Get the (single) Diadem score for each cell in the baseline group.
             for f in files:
                 autotraced_swc = root + '/' + f
-                pair = diadem(metric_dir, gold_standards[count], autotraced_swc, hessian=False)
+                pair = diadem(metric_jar_path, gold_standards[count], autotraced_swc, hessian=False)
                 # only capture the score, ignoring sigma since it equals None.
                 baseline_scores.append(pair[1])
 
@@ -284,7 +282,7 @@ def get_diadem_scores(metric_dir, gold_standard_dir, autotrace_dir, diadem_score
             cell_scores = []
             for f in files:
                 autotraced_swc = root + '/' + f
-                pair = diadem(metric_dir, gold_standards[count], autotraced_swc, hessian=True)
+                pair = diadem(metric_jar_path, gold_standards[count], autotraced_swc, hessian=True)
                 cell_scores.append(pair)
 
             # Sort the Hessian group (sigma, score) pairs by sigma, in increasing order
@@ -342,10 +340,9 @@ def run():
         print('Directory containing Gold Standard SWCs not found. Please ensure the directory structure is correct.')
         return
 
-    metric_dir = str(core_directory) + '/DiademMetric'
-    if not os.path.isdir(metric_dir):
-        print(
-            'Directory containing the Diadem Metric .JAR not found. Please ensure the directory structure is correct.')
+    metric_jar_path = str(core_directory) + '/DiademMetric/DiademMetric.jar'
+    if not os.path.isfile(metric_jar_path):
+        print('Diadem Metric .JAR not found. Please ensure the directory structure is correct.')
         return
 
     output_dir = str(core_directory) + '/OP_Autotrace_Results'
@@ -395,7 +392,7 @@ def run():
             im_copy.setTitle(rename)
             auto_trace(image=im_copy, ref_tree=gs, sigma=si, maximum=ma, use_hessian=True, out_dir=output_dir)
 
-    get_diadem_scores(metric_dir, scaled_gs_dir, output_dir, core_directory)
+    get_diadem_scores(metric_jar_path, scaled_gs_dir, output_dir, core_directory)
 
 
 run()
