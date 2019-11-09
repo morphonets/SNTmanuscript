@@ -237,7 +237,7 @@ def get_diadem_scores(metric_dir, gold_standard_dir, autotrace_dir, diadem_score
 
     # Get the filepaths of the scaled Gold Standard SWCs
     gold_standards = []
-    for gs in os.listdir(gold_standard_dir):
+    for gs in sorted(os.listdir(gold_standard_dir), key=lambda x: x[3]):
         gold_standards.append(gold_standard_dir + '/' + gs)
 
     """ Walk through the "OP_Autotrace_Results" directory and run the Diadem Metric for each auto-traced SWC against 
@@ -268,6 +268,8 @@ def get_diadem_scores(metric_dir, gold_standard_dir, autotrace_dir, diadem_score
     all_hessian_scores = []
     count = 0
     for root, dirs, files in os.walk(autotrace_dir):
+
+        dirs.sort(key=lambda x: x[-1])
 
         if root.endswith("Baseline"):
             # Get the (single) Diadem score for each cell in the baseline group.
