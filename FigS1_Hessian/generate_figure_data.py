@@ -17,8 +17,7 @@ from sc.fiji.snt import (Path, SNT, Tree)
 
 
 def prepare_image_stacks(image_dir):
-    """
-    For each stack directory in image_dir, load the image sequence as
+    """ For each stack directory in image_dir, load the image sequence as
     a stack and spatially calibrate the stack.
 
     Returns:
@@ -37,7 +36,6 @@ def prepare_image_stacks(image_dir):
         cal.pixelWidth = 0.3296485
         cal.pixelHeight = 0.3296485
         cal.pixelDepth = 0.998834955
-        print('Calibrating {}'.format(stack_dir))
         imp.setCalibration(cal)
         imp.setTitle(stack_dir)  # name the image after its directory, e.g. OP_1
         images.append(imp)
@@ -46,8 +44,7 @@ def prepare_image_stacks(image_dir):
 
 
 def prepare_gold_standard_trees(swc_dir):
-    """
-    Scales each Gold Standard SWC by the spatial calibration of its corresponding image.
+    """ Scales each Gold Standard SWC by the spatial calibration of its corresponding image.
     This is necessary since the Gold Standard images are represented in pixel coordinates,
     whereas the images are calibrated in micrometers.
 
@@ -88,8 +85,7 @@ def prepare_gold_standard_trees(swc_dir):
 
 
 def get_files(dir):
-    """
-    Return a list of filepaths in dir..
+    """ Return a list of filepaths in dir..
 
     Args: dir (str): The input directory.
     """
@@ -104,8 +100,7 @@ def get_files(dir):
 
 
 def prepare_output_dir(dir):
-    """
-    Creates the directory tree where auto-trace results will be stored,
+    """ Creates the directory tree where auto-trace results will be stored,
     first removing it if it already exists.
 
     Args:
@@ -119,17 +114,16 @@ def prepare_output_dir(dir):
         os.mkdir(dir)
 
     for i in range(1, 10):
-        new_dir = dir + '/' + "results_OP_{}".format(i)
-        baseline_dir = new_dir + '/' + 'baseline'
-        hessian_dir = new_dir + '/' + 'hessian'
+        new_dir = dir + '/' + "Results_OP_{}".format(i)
+        baseline_dir = new_dir + '/' + 'Baseline'
+        hessian_dir = new_dir + '/' + 'Hessian'
         os.mkdir(new_dir)
         os.mkdir(baseline_dir)
         os.mkdir(hessian_dir)
 
 
 def auto_trace(image, ref_tree, sigma, maximum, use_hessian, out_dir):
-    """
-    For each Path in the Gold Standard Tree, perform
+    """ For each Path in the Gold Standard Tree, perform
     A-star search between the starting and terminal points of the path
     and store the auto-traced Path in a new Tree. The resulting Tree
     is saved to the output directory.
@@ -202,8 +196,7 @@ def auto_trace(image, ref_tree, sigma, maximum, use_hessian, out_dir):
 
 
 def diadem(metric_dir, gold_standard, auto_traced, hessian=False):
-    """
-    Executes the Diadem Metric JAR as a child program in a new process.
+    """ Executes the Diadem Metric JAR as a child program in a new process.
     The Diadem score for the pair of reconstructions is taken from the output stream.
 
     Returns:
@@ -247,8 +240,7 @@ def get_diadem_scores(metric_dir, gold_standard_dir, autotrace_dir, diadem_score
     for gs in os.listdir(gold_standard_dir):
         gold_standards.append(gold_standard_dir + '/' + gs)
 
-    """ 
-    Walk through the "OP_Autotrace_Results" directory and run the Diadem Metric for each auto-traced SWC against 
+    """ Walk through the "OP_Autotrace_Results" directory and run the Diadem Metric for each auto-traced SWC against 
     its corresponding Gold Standard SWC. 
     
     For the baseline group, the single Diadem score for each of the 9 cell reconstructions is appended to 
@@ -258,13 +250,11 @@ def get_diadem_scores(metric_dir, gold_standard_dir, autotrace_dir, diadem_score
     Then, each of these lists is appended to all_hessian_scores (list).
     """
 
-    """
-    The baseline_scores list will resemble:
+    """ The baseline_scores list will resemble:
     [(None, score_OP_1), (None, score_OP_2), (None, score_OP_3), ... , (None, score_OP_9)]
     """
 
-    """
-    The all_scores list will resemble:
+    """ The all_scores list will resemble:
     [[(sigma_1, score_1), (sigma_2, score_2), (sigma_3, score_3), ... , (sigma_n, score_n)], # OP_1
      [(sigma_1, score_1), (sigma_2, score_2), (sigma_3, score_3), ... , (sigma_n, score_n)], # OP_2
      [(sigma_1, score_1), (sigma_2, score_2), (sigma_3, score_3), ... , (sigma_n, score_n)], # OP_3
@@ -279,7 +269,7 @@ def get_diadem_scores(metric_dir, gold_standard_dir, autotrace_dir, diadem_score
     count = 0
     for root, dirs, files in os.walk(autotrace_dir):
 
-        if root.endswith("baseline"):
+        if root.endswith("Baseline"):
             # Get the (single) Diadem score for each cell in the baseline group.
             for f in files:
                 autotraced_swc = root + '/' + f
@@ -287,7 +277,7 @@ def get_diadem_scores(metric_dir, gold_standard_dir, autotrace_dir, diadem_score
                 # only capture the score, ignoring sigma since it equals None.
                 baseline_scores.append(pair[1])
 
-        elif root.endswith('hessian'):
+        elif root.endswith('Hessian'):
             # Get the (multiple) Diadem scores for each cell in the Hessian group.
             cell_scores = []
             for f in files:
@@ -378,7 +368,7 @@ def run():
 
     sigmas = []
     s = 0.1
-    while s < 4.0:
+    while s < 2.0:
         sigmas.append(s)
         s += 0.02
 
