@@ -204,7 +204,7 @@ def diadem(metric_jar_path, gold_standard, auto_traced, hessian=False):
         (None, score) (tuple) if hessian == False
 
     Args:
-        metric_jar_path (str): The directory containing the Diadem Metric .JAR file.
+        metric_jar_path (str): The path of the Diadem Metric .JAR file.
         gold_standard (str): The filepath to the Gold Standard SWC.
         auto_traced (str): The filepath to the auto_traced SWC.
         hessian (bool): Whether or not to capture the sigma parameter from the auto_traced SWC filepath.
