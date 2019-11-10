@@ -366,11 +366,13 @@ def run():
     images_trees_maxes = zip(images, gold_standard_trees, maxes)
 
     sigmas = []
-    s = 0.1
-    while s < 2.0:
+    s = 1.0
+    while s < 1.4:
         sigmas.append(s)
-        s += 0.02
+        s += 0.2
 
+    iterations = len(sigmas) * 9
+    count = 1
     for im, gs, ma in images_trees_maxes:
 
         if str(im.getTitle()) != str(gs.getLabel()):
@@ -391,8 +393,12 @@ def run():
             rename = im_copy.getTitle()[4::]
             im_copy.setTitle(rename)
             auto_trace(image=im_copy, ref_tree=gs, sigma=si, maximum=ma, use_hessian=True, out_dir=output_dir)
+            print("Iteration {} / {}".format(count, iterations))
+            count += 1
 
     get_diadem_scores(metric_jar_path, scaled_gs_dir, output_dir, core_directory)
+
+    print("Completed.")
 
 
 run()
