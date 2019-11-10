@@ -366,10 +366,10 @@ def run():
     images_trees_maxes = zip(images, gold_standard_trees, maxes)
 
     sigmas = []
-    s = 1.0
-    while s < 1.4:
+    s = 0.1
+    while s < 2.0:
         sigmas.append(s)
-        s += 0.2
+        s += 0.02
 
     iterations = len(sigmas) * 9
     count = 1
