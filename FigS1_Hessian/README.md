@@ -17,6 +17,7 @@ The steps in this guide are meant to be performed in the order presented.
 
 For more information regarding the Diadem Metric and Olfactory Projection Fibers Dataset, see:
 http://diademchallenge.org/metric.html
+
 http://diademchallenge.org/olfactory_projection_fibers_readme.html
 
 At this point, the ```/.../FigS1_Hessian/``` directory structure (excluding files) should resemble:
