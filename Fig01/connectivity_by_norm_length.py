@@ -101,7 +101,7 @@ def run():
     #sorted_names = sorted(score_dict, key=lambda x: score_dict[x])
     #print(sorted_names)
 
-    with open(outisMeshAvailable_path, 'w') as f:
+    with open(out_path, 'w') as f:
         json.dump(score_dict, f)
 
 
