@@ -8,7 +8,7 @@ import os.path, json, math
 
 max_ontology_level = 7
 length_cutoff = 0.05
-out_path = os.path.join(os.path.expanduser('~'), 'Desktop/', 'AreaCountsLength-new.json')
+out_path = os.path.join(os.path.expanduser('~'), 'Desktop/', 'AreaCountsLength.json')
 
 diagonal_dict = {}
 
