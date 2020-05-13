@@ -16,7 +16,6 @@ def run():
         return
 
     soma_compartment = AllenUtils.getCompartment("Whole Brain")
-    valid_ancestor = AllenUtils.getCompartment('grey')
     score_dict = {}
 
     print("Retrieving valid identifiers. This can take several minutes...")
@@ -26,30 +25,16 @@ def run():
         print("Parsing " + id + "...")
 
         axon = loader.getTree('axon')
-        tips = TreeAnalyzer(axon).getTips()
-        targets = []
-        for tip in tips:
-            annotation = tip.getAnnotation()
-            if annotation is None:
-                continue
-            if not annotation.containedBy(valid_ancestor):
-                continue
-            depth = annotation.getOntologyDepth()
-            if depth > max_ontology_level:
-                adjusted_annotation = annotation.getAncestor(max_ontology_level-depth)
-            else:
-                adjusted_annotation = annotation
-            if not adjusted_annotation.isMeshAvailable():
-                continue
-            targets.append(str(adjusted_annotation))
+        analyzer = TreeAnalyzer(axon)
+        annotations = analyzer.getAnnotations(max_ontology_level)
+        filtered_targets = []
+        for compartment in annotations:
+            compartment_tips = analyzer.getTips(compartment)
+            if len(compartment_tips) >= tips_cutoff:
+                filtered_targets.append(compartment.name())
 
-        c = Counter(targets)
-        filtered_targets = [x[0] for x in c.items() if x[1] >= tips_cutoff]
         score_dict[id] = len(filtered_targets)
         print('    # targets: ' + str(score_dict[id]))
-
-    #sorted_names = sorted(score_dict, key=lambda x: score_dict[x])
-    #print(sorted_names)
 
     with open(out_path, 'w') as f:
         json.dump(score_dict, f)
