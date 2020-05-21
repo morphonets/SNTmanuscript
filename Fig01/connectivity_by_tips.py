@@ -1,6 +1,6 @@
 from sc.fiji.snt.io import (MouseLightLoader, MouseLightQuerier)
 from sc.fiji.snt.annotation import (AllenCompartment, AllenUtils)
-from sc.fiji.snt.analysis import TreeAnalyzer
+from sc.fiji.snt.analysis import (TreeAnalyzer, NodeStatistics)
 from collections import (Counter, defaultdict)
 import os.path, json, math
 
@@ -10,31 +10,35 @@ out_path = os.path.join(os.path.expanduser('~'), 'Desktop/', 'AreaCountsTips.jso
 
 
 def run():
-
     if not MouseLightLoader.isDatabaseAvailable():
         print("Cannot reach ML database. Aborting...")
         return
 
     soma_compartment = AllenUtils.getCompartment("Whole Brain")
+    valid_ancestor = AllenUtils.getCompartment('grey')
     score_dict = {}
 
     print("Retrieving valid identifiers. This can take several minutes...")
     for id in MouseLightQuerier.getIDs(soma_compartment):
-
         loader = MouseLightLoader(id)
         print("Parsing " + id + "...")
 
         axon = loader.getTree('axon')
-        analyzer = TreeAnalyzer(axon)
-        annotations = analyzer.getAnnotations(max_ontology_level)
-        filtered_targets = []
-        for compartment in annotations:
-            compartment_tips = analyzer.getTips(compartment)
-            if len(compartment_tips) >= tips_cutoff:
-                filtered_targets.append(compartment.name())
+        tips = TreeAnalyzer(axon).getTips()
+        annotated_frequencies_dict = NodeStatistics(tips).getAnnotatedFrequencies(max_ontology_level)
+        # Filter for relevant compartments
+        annotated_frequencies_dict = {compartment: count for (compartment, count) in annotated_frequencies_dict.items()
+                                      if
+                                      compartment is not None
+                                      and
+                                      compartment.isChildOf(valid_ancestor)}
 
-        score_dict[id] = len(filtered_targets)
-        print('    # targets: ' + str(score_dict[id]))
+        filtered_targets_list = [compartment.name() for (compartment, count) in annotated_frequencies_dict.items()
+                                 if
+                                 count >= tips_cutoff]
+
+        score_dict[id] = len(filtered_targets_list)
+        print('	# targets: ' + str(score_dict[id]))
 
     with open(out_path, 'w') as f:
         json.dump(score_dict, f)
