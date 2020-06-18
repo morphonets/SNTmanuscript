@@ -1,6 +1,6 @@
 from sc.fiji.snt.io import (MouseLightLoader, MouseLightQuerier)
 from sc.fiji.snt.annotation import (AllenCompartment, AllenUtils)
-from sc.fiji.snt.analysis import TreeAnalyzer
+from sc.fiji.snt.analysis import (TreeAnalyzer, NodeStatistics)
 from collections import (Counter, defaultdict)
 import os.path, json, math
 
@@ -10,7 +10,6 @@ out_path = os.path.join(os.path.expanduser('~'), 'Desktop/', 'AreaCountsTips.jso
 
 
 def run():
-
     if not MouseLightLoader.isDatabaseAvailable():
         print("Cannot reach ML database. Aborting...")
         return
@@ -21,35 +20,25 @@ def run():
 
     print("Retrieving valid identifiers. This can take several minutes...")
     for id in MouseLightQuerier.getIDs(soma_compartment):
-
         loader = MouseLightLoader(id)
         print("Parsing " + id + "...")
 
         axon = loader.getTree('axon')
         tips = TreeAnalyzer(axon).getTips()
-        targets = []
-        for tip in tips:
-            annotation = tip.getAnnotation()
-            if annotation is None:
-                continue
-            if not annotation.containedBy(valid_ancestor):
-                continue
-            depth = annotation.getOntologyDepth()
-            if depth > max_ontology_level:
-                adjusted_annotation = annotation.getAncestor(max_ontology_level-depth)
-            else:
-                adjusted_annotation = annotation
-            if not adjusted_annotation.isMeshAvailable():
-                continue
-            targets.append(str(adjusted_annotation))
+        annotated_frequencies_dict = NodeStatistics(tips).getAnnotatedFrequencies(max_ontology_level)
+        # Filter for relevant compartments
+        annotated_frequencies_dict = {compartment: count for (compartment, count) in annotated_frequencies_dict.items()
+                                      if
+                                      compartment is not None
+                                      and
+                                      compartment.isChildOf(valid_ancestor)}
 
-        c = Counter(targets)
-        filtered_targets = [x[0] for x in c.items() if x[1] >= tips_cutoff]
-        score_dict[id] = len(filtered_targets)
-        print('    # targets: ' + str(score_dict[id]))
+        filtered_targets_list = [compartment.name() for (compartment, count) in annotated_frequencies_dict.items()
+                                 if
+                                 count >= tips_cutoff]
 
-    #sorted_names = sorted(score_dict, key=lambda x: score_dict[x])
-    #print(sorted_names)
+        score_dict[id] = len(filtered_targets_list)
+        print('	# targets: ' + str(score_dict[id]))
 
     with open(out_path, 'w') as f:
         json.dump(score_dict, f)

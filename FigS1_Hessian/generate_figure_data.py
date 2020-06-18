@@ -3,6 +3,12 @@
 # @SNTService snt
 # @UIService ui
 
+"""
+file:       generate_figure_data.py
+author:     Cameron Arshadi, Tiago Ferreira
+info:       Generates Diadem scoring data for FigS1_Hessian
+"""
+
 import os
 import shutil
 import re
