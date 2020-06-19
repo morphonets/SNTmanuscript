@@ -1,22 +1,21 @@
 #@UIService ui
 
 import sc.fiji.snt.annotation.*
-import org.scijava.table.DefaultGenericTable
+import sc.fiji.snt.analysis.SNTTable
 
 scope = AllenUtils.getCompartment("grey")
 maxDepth = 7
 
-table = new DefaultGenericTable()
+table = new SNTTable()
 table.appendColumn("ID")
 table.appendColumn("Name")
 table.appendColumn("Abbrev")
 
 for (c in scope.getChildren()) {
 	if (c.isMeshAvailable() && c.getOntologyDepth() <= maxDepth) {
-		table.appendRow()
-		table.set("ID", table.getRowCount()-1, c.id())
-		table.set("Name", table.getRowCount()-1, c.name())
-		table.set("Abbrev", table.getRowCount()-1, c.acronym())
+		table.appendToLastRow("ID", c.id())
+		table.appendToLastRow("Name", c.name())
+		table.appendToLastRow("Abbrev", c.acronym())
 	}
 }
 ui.show("Brain Regions", table)
