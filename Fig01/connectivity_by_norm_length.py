@@ -1,10 +1,7 @@
 from sc.fiji.snt.io import (MouseLightLoader, MouseLightQuerier)
 from sc.fiji.snt.annotation import (AllenCompartment, AllenUtils)
-from sc.fiji.snt.analysis import TreeAnalyzer, TreeStatistics
-from sc.fiji.snt.analysis.graph import GraphUtils
-from org.jgrapht import Graphs
-from collections import (Counter, defaultdict)
-import os.path, json, math
+from sc.fiji.snt.analysis import TreeStatistics
+import os.path, json
 
 max_ontology_level = 7
 length_cutoff = 0.05

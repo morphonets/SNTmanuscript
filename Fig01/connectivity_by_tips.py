@@ -1,8 +1,7 @@
 from sc.fiji.snt.io import (MouseLightLoader, MouseLightQuerier)
 from sc.fiji.snt.annotation import (AllenCompartment, AllenUtils)
 from sc.fiji.snt.analysis import (TreeAnalyzer, NodeStatistics)
-from collections import (Counter, defaultdict)
-import os.path, json, math
+import os.path, json
 
 max_ontology_level = 7
 tips_cutoff = 2
