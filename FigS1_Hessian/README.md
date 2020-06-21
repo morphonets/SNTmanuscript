@@ -1,16 +1,13 @@
-This guide assumes the most recent version of Fiji is installed on the user’s computer and that the user is subscribed to the “Neuroanatomy-Unstable” and “SciView” update sites.
+These instructions are meant to be performed in the order presented. A system Java installation is also necessary for the DiademMetric.jar to be executed with Python's subprocess module.
 
-A system Java installation is also necessary for the DiademMetric.jar to be executed with Python's subprocess module.
-
-The steps in this guide are meant to be performed in the order presented.
-
-# Download the Olfactory Projection Fibers Dataset
+### Download the Olfactory Projection Fibers Dataset
 
 1. Open http://diademchallenge.org/data_set_downloads.html
 2. Download ```Olfactory_Projection_Fibers.rar```  into ```/.../FigS1_Hessian/```
 3. Extract ```Olfactory_Projection_Fibers.rar``` into the same directory.
 
-# Download the Diadem Metric
+### Download the Diadem Metric
+
 1. Open http://diademchallenge.org/metric_readme.html
 2. Download ```DiademMetric.zip``` or ```Diadem Metric.tar``` into ```/.../FigS1_Hessian/```
 3. Extract the archive to ```/.../FigS1_Hessian/DiademMetric/```
@@ -23,7 +20,7 @@ At this point, the ```/.../FigS1_Hessian/``` directory structure (excluding file
 
 ![alt text](./misc/dirstructure.png?raw=true)
 
-# Run generate_figure_data.py
+### Run generate_figure_data.py
 
 1. From the Script Editor, go to File -> Open
 2. Select ```/.../FigS1_Hessian/generate_figure_data.py``` in the file explorer.
