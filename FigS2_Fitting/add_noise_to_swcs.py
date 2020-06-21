@@ -3,6 +3,7 @@
 import os
 import shutil
 import random
+import re
 
 from sc.fiji.snt import Tree
 from sc.fiji.snt.util import PointInImage
@@ -46,7 +47,7 @@ def run():
     for swc in swcs:
         tree = Tree(swc)
         tree.scale(0.3296485, 0.3296485, 0.998834955)
-        cell_number = tree.getLabel()[-5]
+        cell_number = re.search("OP_(\d)", tree.getLabel()).group(1)
         noisy_tree = add_noise_to_tree(tree)
         output_filepath = output_dir + '/OP_{}_noisy.swc'.format(cell_number)
         success = "File saved" if noisy_tree.saveAsSWC(output_filepath) else "unsaved result. I/O error?"
