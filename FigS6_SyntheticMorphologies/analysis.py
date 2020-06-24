@@ -14,8 +14,9 @@ from os.path import expanduser
 home = expanduser("~")
 
 #result_directory = home + '/Dropbox/SNTmanuscript/Simulations/GRNFinalAnalysis/'
-result_directory = home + '/Data/SNT/GRN_RandomNeuriteDir/'
-output_directory = result_directory + '/output/'
+#result_directory = home + '/Data/SNT/GRN_RandomNeuriteDir/'
+result_directory = home + '/Dropbox/SNTmanuscript/Simulations/GRNFinalAnalysis/'
+output_directory = result_directory + '/output_khtest/'
 
 num_grns = 5
 
@@ -28,7 +29,7 @@ data = {}
 
 for grn in range(num_grns):
     filename = result_directory + 'grn_' + str(grn) + '.csv'
-    pdata = pd.read_csv(filename, sep='\t')
+    pdata = pd.read_csv(filename, sep=',')
     data[filename] = pdata
 
 
@@ -36,8 +37,12 @@ pdata = pd.concat(data.values())
 
 # %%
 
+print(list(pdata.keys()))
+
+# %%
+
 # Keys for SNT measurements
-snt_keys = [k for k in pdata.keys() if k != 'UIDrandomSeed' and k != 'filenameGRN' and k != 'randomSeed']
+snt_keys = [k for k in pdata.keys() if k != 'UIDrandomSeed' and k != 'filenameGRN' and k != 'randomSeed' and k != 'filenameGRN.1' and k!= 'Description']
 
 grns = sorted(list(set(pdata['filenameGRN'])))
 # Dictionary that maps grn filenames to an integer GRN uid
@@ -45,7 +50,13 @@ grn_dict = dict(zip(grns, range(len(grns))))
 
 # Filter SNT_keys
 #snt_keys = ['Cable length', 'No. of terminal branches', 'No. of branch points', 'Depth', 'Horton-Strahler number', 'Horton-Strahler bifurcation ratio', 'Length of primary branches (sum)', 'Height', 'Length of terminal branches (sum)', 'No. of tips', 'No. of branches', 'Width' ]
-snt_keys = ['Cable length', 'No. of branch points', 'Depth', 'Horton-Strahler number', 'No. of tips', 'No. of branches' ]
+
+# this was used for stats in the first draft
+#snt_keys = ['Cable length', 'No. of branch points', 'Depth', 'Horton-Strahler number', 'No. of tips', 'No. of branches' ]
+snt_keys = ['Average branch length', 'Average contraction', 'Average fractal dimension', 'Average fragmentation', 'Average partition asymmetry', 'Average remote bif. angle', 'Cable length', 'Depth', 'Height', 'Highest path order', 'Horton-Strahler bifurcation ratio', 'Horton-Strahler number', 'Length of inner branches (sum)', 'Length of primary branches (sum)', 'Length of terminal branches (sum)', 'Mean radius', 'No. of branch points', 'No. of branches', 'No. of inner branches', 'No. of nodes', 'No. of primary branches', 'No. of terminal branches', 'No. of tips', 'Sholl: Centroid', 'Sholl: Centroid radius', 'Sholl: Decay', 'Sholl: Degree of Polynomial fit', 'Sholl: Enclosing radius', 'Sholl: Intercept', 'Sholl: Kurtosis', 'Sholl: Max', 'Sholl: Max (fitted)', 'Sholl: Max (fitted) radius', 'Sholl: Mean', 'Sholl: Median', 'Sholl: No. maxima', 'Sholl: No. secondary maxima', 'Sholl: Skeweness', 'Sholl: Sum', 'Sholl: Variance', 'Width']
+
+
+
 #snt_keys = ['Cable length', 'Width', 'Depth', 'Horton-Strahler bifurcation ratio', 'Height']
 #snt_keys = ['Width', 'Depth', 'Height']
 
@@ -142,10 +153,10 @@ def ttest_grns(grn_a_id, grn_b_id):
     #stats.ttest_ind(snt_mat_a,snt_mat_b, equal_var = False)
     return stats.ttest_ind(mean_a_dists,mean_b_dists, equal_var = False)
 
-for a in range(5):
-    for b in range(5):
-        tresult = ttest_grns(a,b)
-        print([a,b,tresult])
+# for a in range(5):
+#     for b in range(5):
+#         tresult = ttest_grns(a,b)
+#         print([a,b,tresult])
 
 ###
 # %% Show statistical test for difference between all GRNs with a KS 2 samp test
@@ -383,31 +394,31 @@ for a in range(5):
 
 # %% Pairplot with PCA
 
-plt.figure()
-sns.pairplot(pd.DataFrame(data=full_mat,columns=['grn']+snt_keys+['pca' + str(el) for el in range(pca_snt_mat.shape[1])]))
-plt.savefig(output_directory + "/pairplot_pca_v01.png")
+#plt.figure()
+#sns.pairplot(pd.DataFrame(data=full_mat,columns=['grn']+snt_keys+['pca' + str(el) for el in range(pca_snt_mat.shape[1])]))
+#plt.savefig(output_directory + "/pairplot_pca_v01.png")
 
 # %% PCA scree plot
 
-plt.plot(range(1,len(pca.explained_variance_ratio_)+1),np.cumsum(pca.explained_variance_ratio_))
-plt.xlabel('number of components')
-plt.ylabel('cumulative explained variance')
-plt.savefig(output_directory + "/pca_scree.png")
+#plt.plot(range(1,len(pca.explained_variance_ratio_)+1),np.cumsum(pca.explained_variance_ratio_))
+#plt.xlabel('number of components')
+#plt.ylabel('cumulative explained variance')
+#plt.savefig(output_directory + "/pca_scree.png")
 
 # %% PCA GRN scatter
 
 #pca_snt_mat = pca.transform(norm_snt_mat)
 
-import matplotlib.colors as mcolors
-
-colors = list(mcolors.TABLEAU_COLORS)
-
-for grn_id in range(5):
-    grn_mask = np.array([ True if grn == grn_id else False for grn in grn_mat ])
-    x = pca_snt_mat[grn_mask,0]
-    y = pca_snt_mat[grn_mask,1]
-    plt.scatter(x,y,color=colors[grn_id % len(colors)])
-plt.savefig(output_directory + '/pca_scatter_grncolor.png')
+# import matplotlib.colors as mcolors
+#
+# colors = list(mcolors.TABLEAU_COLORS)
+#
+# for grn_id in range(5):
+#     grn_mask = np.array([ True if grn == grn_id else False for grn in grn_mat ])
+#     x = pca_snt_mat[grn_mask,0]
+#     y = pca_snt_mat[grn_mask,1]
+#     plt.scatter(x,y,color=colors[grn_id % len(colors)])
+# plt.savefig(output_directory + '/pca_scatter_grncolor.png')
 
 # %% tSNE
 
@@ -420,7 +431,7 @@ palette = sns.color_palette("bright", 10)
 
 tsne_snt_mat = TSNE(n_components=2,perplexity=5).fit_transform(snt_mat)
 
-full_mat = np.hstack([grn_mat[:,np.newaxis], snt_mat, pca_snt_mat, tsne_snt_mat])
+full_mat = np.hstack([grn_mat[:,np.newaxis], snt_mat, tsne_snt_mat])
 
 def ks2samp_full(grn_a_id, grn_b_id):
 
@@ -447,7 +458,7 @@ def ks2samp_full(grn_a_id, grn_b_id):
     # combined_pvalue = np.min(pvalues)
     # return combined_pvalue
 
-
+print('p-values of Kolmogorov-Smirnoff 2-sample test on SNT + tSNE features combined with fisher method:')
 
 for a in range(5):
     for b in range(5):
