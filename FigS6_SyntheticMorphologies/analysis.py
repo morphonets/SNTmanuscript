@@ -3,7 +3,9 @@ import pandas as pd
 import warnings
 from os.path import expanduser
 from scipy import stats
+from umap import UMAP
 from sklearn.manifold import TSNE
+from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
@@ -37,7 +39,7 @@ num_grns = len(grns)
 # Dictionary that maps grn filenames to an integer GRN uid
 grn_dict = dict(zip(grns, range(num_grns)))
 
-# Derine numpy matrices
+# Define numpy matrices
 snt_mat = pdata[snt_keys].to_numpy() # Matrix of SNT measurements
 grn_mat = np.array([ grn_dict[grn] for grn in pdata['filenameGRN'] ]) #Matrix of GRN uids
 
@@ -47,20 +49,14 @@ grn_mat = grn_mat[nan_mask]
 snt_mat = snt_mat[nan_mask] # remove from snt_mat last
 
 
-# %% tSNE analysis
-norm_snt_mat = StandardScaler().fit_transform(snt_mat)
-tsne_snt_mat = TSNE(n_components=3, random_state=13, perplexity=30).fit_transform(norm_snt_mat)
-full_mat = np.hstack([grn_mat[:, np.newaxis], snt_mat])
-
-def ks2samp_full(grn_a_id, grn_b_id):
+def ks2samp_full(grn_a_id, grn_b_id, mat):
     warnings.filterwarnings("ignore")
-    global full_mat
 
     grn_a_mask = np.array([ True if grn == grn_a_id else False for grn in grn_mat ])
     grn_b_mask = np.array([ True if grn == grn_b_id else False for grn in grn_mat ])
 
-    snt_mat_a = full_mat[grn_a_mask, 1:]
-    snt_mat_b = full_mat[grn_b_mask, 1:]
+    snt_mat_a = mat[grn_a_mask, 1:]
+    snt_mat_b = mat[grn_b_mask, 1:]
 
     pvalues = []
     for pid in range(snt_mat_b.shape[1]):
@@ -72,37 +68,63 @@ def ks2samp_full(grn_a_id, grn_b_id):
     return combined_pvalue[1]
 
 
-# %% Generate report
-print('p-values of K-S 2-sample test on tSNE features combined with Fisher:')
+def generate_report(mat, method):
+    # %% Generate report
+    print('p-values of K-S 2-sample test on {} features combined with Fisher:'.format(method))
 
-for a in range(num_grns):
-    print('- - - - - - - - -')
-    for b in range(num_grns):
-        pvalue = ks2samp_full(a,b)
-        if( a == b ):
-            print('N/A\t', end='')
-        elif( pvalue < 0.0001 ):
-            print('***\t', end='')
-        elif( pvalue < 0.001 ):
-            print('**\t', end='')
-        elif( pvalue < 0.05 ):
-            print('*\t', end='')
-        else:
-            print('NS\t', end='')
-        print('\t'.join([str(el) for el in [a,b,pvalue]]))
+    for a in range(num_grns):
+        print('- - - - - - - - -')
+        for b in range(num_grns):
+            pvalue = ks2samp_full(a, b, mat)
+            if( a == b ):
+                print('N/A\t', end='')
+            elif( pvalue < 0.0001 ):
+                print('***\t', end='')
+            elif( pvalue < 0.001 ):
+                print('**\t', end='')
+            elif( pvalue < 0.05 ):
+                print('*\t', end='')
+            else:
+                print('NS\t', end='')
+            print('\t'.join([str(el) for el in [a,b,pvalue]]))
 
-print(str(len(snt_keys)) + " metrics used")
+    print(str(len(snt_keys)) + " metrics used")
+    
+    
+def visualize_embedding(mat):
+    # 3 components
+    fig = plt.figure(figsize=(15, 15))
+    ax = Axes3D(fig)
+    scatter = ax.scatter(mat[:,0], mat[:,1], mat[:,2],
+                          s=50, c=grn_mat, cmap=plt.get_cmap("viridis"))
+
+    # 2 components
+    fig, ax = plt.subplots(figsize=(10,10))
+    scatter = ax.scatter(mat[:,0], mat[:,1],
+                         s=50, c=grn_mat, cmap=plt.get_cmap("viridis"))
+    plt.legend(handles=scatter.legend_elements()[0], labels=grns)
 
 
-# %% Visualize
-# 3 components
-fig = plt.figure(figsize=(15, 15))
-ax = Axes3D(fig)
-scatter = ax.scatter(tsne_snt_mat[:,0], tsne_snt_mat[:,1], tsne_snt_mat[:,2],
-                      s=50, c=grn_mat, cmap=plt.get_cmap("viridis"))
+norm_snt_mat = StandardScaler().fit_transform(snt_mat)
 
-# 2 components
-fig, ax = plt.subplots(figsize=(10,10))
-scatter = ax.scatter(tsne_snt_mat[:,0], tsne_snt_mat[:,1],
-                     s=50, c=grn_mat, cmap=plt.get_cmap("viridis"))
-plt.legend(handles=scatter.legend_elements()[0], labels=grns)
+# %% tSNE analysis
+tsne_snt_mat = TSNE(n_components=3, random_state=13, perplexity=30).fit_transform(norm_snt_mat)
+full_mat_tsne = np.hstack([grn_mat[:, np.newaxis], tsne_snt_mat])
+generate_report(full_mat_tsne, "t-sne")
+visualize_embedding(tsne_snt_mat)
+
+# %% UMAP analysis
+umap_snt_mat = UMAP(n_components=3, random_state=13).fit_transform(norm_snt_mat)
+full_mat_umap = np.hstack([grn_mat[:, np.newaxis], umap_snt_mat])
+generate_report(full_mat_umap, "umap")
+visualize_embedding(umap_snt_mat)
+
+# %% PCA analysis
+pca = PCA(n_components=3)
+pca.fit(norm_snt_mat)
+print("Explained variance ratio: ", pca.explained_variance_ratio_)
+print("Singular values: ", pca.singular_values_)
+pca_snt_mat = pca.transform(norm_snt_mat)
+full_mat_pca = np.hstack([grn_mat[:, np.newaxis], pca_snt_mat])
+generate_report(full_mat_pca, "pca")
+visualize_embedding(pca_snt_mat)
