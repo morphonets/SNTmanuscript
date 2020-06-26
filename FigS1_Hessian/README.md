@@ -1,3 +1,7 @@
+
+
+## Fig S1
+
 These instructions are meant to be performed in the order presented. A system Java installation is also necessary for the DiademMetric.jar to be executed with Python's subprocess module.
 
 ### Download the Olfactory Projection Fibers Dataset
