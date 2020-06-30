@@ -1,0 +1,109 @@
+import sc.fiji.snt.*;
+import sc.fiji.snt.analysis.*;
+import sc.fiji.snt.annotation.*;
+import sc.fiji.snt.io.*;
+import sc.fiji.snt.gui.*;
+import sc.fiji.snt.util.*;
+import sc.fiji.snt.viewer.*;
+
+import java.awt.Font;
+import org.scijava.util.Colors;
+
+
+/*
+ * If you have downloaded all reconstructions in bulk to a local directory,
+ * specify its path here. Otherwise leave it blank: Doing so will force the
+ * script to download each file from the MouseLight server. Note that download
+ * of individual files may take significantly longer than loading local files.
+ */
+global.inputDir = "/home/tferr/Desktop/databaseSWCs";
+
+/* The output directory where frames will be saved */
+global.outputDir = "/home/tferr/Desktop/sntAnimation";
+
+/* The max. no. of neurons to be included in the animation */
+global.maxNeurons = 10; //1000
+
+/* Dry run? Wheter saving of animation frames should be skipped */
+global.dryRun = true;
+
+List getNeurons() {
+	if (new File(inputDir).exists()) {
+		trees = Tree.listFromDir(inputDir, ".swc");
+		return (trees.size <= maxNeurons) ? trees : trees.subList(0, maxNeurons);
+	} else if (MouseLightQuerier.isDatabaseAvailable()) {
+		ids = MouseLightQuerier.getAllIDs().subList(0, maxNeurons);
+		trees = new ArrayList(ids.size());
+		for (id : ids) trees.add(new MouseLightLoader(id).getTree());
+		return trees;
+	}
+	return null;
+}
+
+neurons = getNeurons();
+if (neurons == null) {
+    print("No cells available! Cannot proceed");
+    return;
+}
+
+// Prepare viewer
+viewer = new Viewer3D();
+viewer.setSnapshotDir(outputDir);
+
+// Define viewer dimensions and label positioning. The final animation
+// will be flipped vertically, so we'll flip labels as well
+height = Toolkit.getDefaultToolkit().getScreenSize().getHeight();
+width = height * 0.75f;
+labelSize = (height>1000) ? 40 : 20; //Increase font for hiDPI screens
+viewer.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, labelSize), -180, Colors.WHITE);
+viewer.setLabelLocation((float)width, (float)1.5*labelSize);
+
+// Assemble common scene. This were recorded up-front using the
+// "Log scene details [L]" command from an interactive viewer.
+viewer.loadRefBrain("mouse");
+viewer.setViewMode("side");
+viewer.setViewPoint((float) (Math.PI / 2), 0f);
+viewer.setBounds(1568.4558f, 9876.3125f, 169.30203f, 6100.1167f, 2052.2354f, 12584.423f);
+
+// Show the viewer
+viewer.show((int)width, (int)height);
+
+// Record empty scene
+viewer.addLabel(" ");
+if (!dryRun) viewer.saveSnapshot();
+
+// 1st loop: fill brain
+cumLength = 0d;
+colors = SNTColor.getDistinctColors(neurons.size());
+
+counter = 0;
+for (neuron : neurons) {
+
+    // Reduce the thickness of loaded neurons
+    viewer.setTreeThickness(1.5f);
+
+    // Add neuron
+    neuron.setColor(colors[counter++]);
+    neuron.setRadii(4.5d);
+    viewer.add(neuron);
+    cumLength += new TreeAnalyzer(neuron).getCableLength();
+    label = "Neurons: "+ counter +"   Lenght: "+ GuiUtils.scaledMicrometer(cumLength, 3);
+    viewer.addLabel(label);
+    if (!dryRun) viewer.saveSnapshot();
+ 
+    viewer.rotate(1f);
+    viewer.setTreeThickness(1.5f);
+}
+
+// complete rotation
+for (i = (counter % 360); i <= 360; i++) {
+    viewer.rotate(1);
+    if (!dryRun) viewer.saveSnapshot();
+}
+
+// Do an extra full rotation
+for (i = 1; i <= 360; i++) {
+    viewer.rotate(1);
+    if (i == 180) viewer.addLabel("");
+    if (!dryRun) viewer.saveSnapshot();
+}
