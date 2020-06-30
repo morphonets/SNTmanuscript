@@ -31,33 +31,21 @@ for grn_idx, grn in enumerate(grns):
         cur_root = grn[i].getRoot()
         grn[i].translate(align_to.getX()-cur_root.getX(), align_to.getY()-cur_root.getY(), align_to.getZ()-cur_root.getZ())
 
-    from org.scijava.util import Colors
-    colors = [Colors.RED, Colors.BLUE, Colors.BLACK]
- 
+    colors = ["red", "blue", "black"]
     grn = sorted(grn, key=lambda x: -TreeAnalyzer(x).getCableLength())
-    
     v = Viewer2D()
     for tree_idx, tree in enumerate(grn):
         grn[tree_idx].translate(xoffsets[grn_idx], yspacings[grn_idx]*tree_idx, 0)
         grn[tree_idx].scale(scales[grn_idx], scales[grn_idx], scales[grn_idx])
         v.add(grn[tree_idx], colors[tree_idx])
 
-    ## Customize rendering. NB: Deprecated. These customizations
-    ## can be done with SNTChart. No need to call JFreeChart API
-    from org.jfree.chart import (ChartFrame, ChartUtils)
-    from java.io import File
+    ## Customize rendering
     chart = v.getChart()
-    chart.setAntiAlias(True)
-    chart.getPlot().getRangeAxis().setVisible(False)
-    chart.getPlot().getDomainAxis().setVisible(False)
-    chart.getPlot().setOutlineVisible(False)
-    chart.getPlot().setDomainGridlinesVisible(False)
-    chart.getPlot().setRangeGridlinesVisible(False)
-    frame = ChartFrame(labels[grn_idx], chart)
+    chart.setAxesVisible(False)
+    chart.setGridlinesVisible(False)
+    chart.setOutlineVisible(False)
     width = 530 *2
     height = 900*2 if yspacings[grn_idx] > 0 else 700*2
-    frame.pack()
-    frame.setVisible(True)
-    ChartUtils.saveChartAsPNG(File(out_dir + "/" + labels[grn_idx] + ".png"),
-                             chart, width, height)
+    chart.show(width, height)
+    chart.saveChartAsPNG(out_dir + "/" + labels[grn_idx])
 
