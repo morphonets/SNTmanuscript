@@ -1,6 +1,6 @@
 # SNT Manuscript Scripts
 
-This repository hosts the scripts that were used to assemble the figures of the SNT publication. Each figure is associated with a sub-folder. When relevant, further details are provided on sub-folders `README` files. Please open an [issue](https://github.com/morphonets/SNTmanuscript/issues) on this repository if you run into problems.
+This repository hosts the scripts that were used to assemble the figures of the [SNT publication](https://www.biorxiv.org/content/10.1101/2020.07.13.179325v1). Each figure is associated with a sub-folder. When relevant, further details are provided on sub-folders `README` files. Please open an [issue](https://github.com/morphonets/SNTmanuscript/issues) on this repository if you run into problems.
 
 
 
