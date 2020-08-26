@@ -196,7 +196,7 @@ def auto_trace(image, ref_tree, sigma, maximum, use_hessian, out_dir):
     new_tree.setSWCType("axon")
 
     success = "File saved" if new_tree.saveAsSWC(traced_result) else "unsaved result. I/O error?"
-    log.info(success)
+    print(success)
 
     snt.dispose()
 
