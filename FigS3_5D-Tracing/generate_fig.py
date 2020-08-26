@@ -3,18 +3,24 @@
 
 import inspect
 import os
+import ij.IJ
 import sc.fiji.snt.PathManagerUI
 
+
+def getPathOfTracesFile(remoteUrl):
+    import tempfile, urllib
+    tmp_file, filename = tempfile.mkstemp()
+    urllib.urlretrieve(remoteUrl, tmp_file)
+    return str(tmp_file)
+
+
+
 # Load files
-fig_dir = os.path.dirname(os.path.abspath(inspect.getsourcefile(lambda: 0)))
-traces_dir = fig_dir + '/traces'
-
 mitosis_img_url = "http://wsr.imagej.net/images/mitosis.tif"
-snt.initialize(mitosis_img_url, True)  # Path to image, whether ui should be displayed
+traces_url = "https://raw.githubusercontent.com/morphonets/SNTmanuscript/master/FigS3_5D-Tracing/traces/mitosis.traces"
 
-for f in os.listdir(traces_dir):
-    traces_file = traces_dir + '/' + f
-    snt.loadTracings(traces_file)
+snt.initialize(mitosis_img_url, True)  # Path to image, whether ui should be displayed
+snt.loadTracings(getPathOfTracesFile(traces_url))
 
 # Set options and access the "Path Manager" dialog
 snt.getPlugin().enableSnapCursor(False)

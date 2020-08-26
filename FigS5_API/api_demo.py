@@ -1,6 +1,9 @@
+#@Context context
 #@SNTService snt
 from sc.fiji.snt import Tree
 from sc.fiji.snt.analysis import (TreeStatistics, GroupedTreeStatistics)
+from sc.fiji.snt.analysis.graph import GraphColorMapper as GCM
+
 
 def showChart(chart, w, h):
     chart.setFontSize(16)
@@ -29,4 +32,6 @@ hist.annotateCategory(soma_loc, "Soma")
 showChart(hist, 400, 750)
 
 # panel d
-tree.getGraph().show().setSize(750, 750)
+graph = tree.getGraph()
+GCM(context).map(graph, "Edge weight", "Ice")
+graph.show()
