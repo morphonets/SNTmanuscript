@@ -16,6 +16,8 @@ from sc.fiji.snt.annotation import (AllenCompartment, AllenUtils)
 from sc.fiji.snt.io import MouseLightLoader
 from sc.fiji.snt.util import BoundingBox
 from sc.fiji.snt.viewer import (Annotation3D, OBJMesh, GraphViewer)
+from sc.fiji.snt.viewer.geditor import mxCircleLayoutGrouped
+from com.mxgraph.layout import mxParallelEdgeLayout
 
 # Documentation Resources: https://imagej.net/SNT:_Scripting
 # Latest SNT API: https://morphonets.github.io/SNT/
@@ -107,18 +109,33 @@ def get_node(int_id):
 	return node
 
 
+
 for cell_id in [ "AA1044", "AA0100", "AA0788" ]:
     t = MouseLightLoader(cell_id).getTree("axon")
     g1 = AnnotationGraph([t], "tips", 2, 7)
     g2 = AnnotationGraph([t], "length", 0, 7)
+  
     filter_compartments_by_bounding_box(g2)
     normalize_edge_weights(g1)
     normalize_edge_weights(g2)
+ 
     mapper = GraphColorMapper(context)
     mapper.setMinMax(0.10, 1.0)
     mapper.map(g1, GraphColorMapper.EDGE_WEIGHT, "mpl-plasma")
     mapper.map(g2, GraphColorMapper.EDGE_WEIGHT, "mpl-viridis")
+  
     intersection_graph = merge_graphs(g1, g2)
+  
     viewer = GraphViewer(intersection_graph)
     viewer.setContext(context)
+    editor = viewer.getEditor()
+    snt_graph_adapter = editor.getGraphComponent().getGraph()
+    snt_graph_adapter.scaleEdgeWidths(1, 15, "linear")
+    grouped_layout = mxCircleLayoutGrouped(snt_graph_adapter, 7, 4)
+    if cell_id == "AA1044":
+    	grouped_layout.setRadius(100)
+    else:
+    	grouped_layout.setRadius(0) # determine suitable radius automatically
+    editor.applyLayout(grouped_layout)
+    editor.applyLayout(mxParallelEdgeLayout(snt_graph_adapter))  
     viewer.show()
