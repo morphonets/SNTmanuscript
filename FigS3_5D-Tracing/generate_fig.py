@@ -3,24 +3,17 @@
 
 import inspect
 import os
-import ij.IJ
 import sc.fiji.snt.PathManagerUI
-
-
-def getPathOfTracesFile(remoteUrl):
-    import tempfile, urllib
-    tmp_file, filename = tempfile.mkstemp()
-    urllib.urlretrieve(remoteUrl, tmp_file)
-    return str(tmp_file)
-
 
 
 # Load files
 mitosis_img_url = "http://wsr.imagej.net/images/mitosis.tif"
-traces_url = "https://raw.githubusercontent.com/morphonets/SNTmanuscript/master/FigS3_5D-Tracing/traces/mitosis.traces"
+
+fig_dir = os.path.dirname(os.path.abspath(inspect.getsourcefile(lambda: 0)))
+traces_file = os.path.join(fig_dir, "traces", "mitosis.traces")
 
 snt.initialize(mitosis_img_url, True)  # Path to image, whether ui should be displayed
-snt.loadTracings(getPathOfTracesFile(traces_url))
+snt.loadTracings(str(traces_file))
 
 # Set options and access the "Path Manager" dialog
 snt.getPlugin().enableSnapCursor(False)
@@ -35,10 +28,10 @@ pm_ui.runCommand("Length")
 pm_ui.applySelectionFilter("Path order", 2)
 
 # Run Path Manager's Analyze>Distribution Analysis... command
-pm_ui.runCommand("Distribution Analysis...", "Node intensity values")
+pm_ui.runCommand("Distribution of Path Properties...", "Node intensity values")
 
 # Run Path Manager's Analyze>Color Coding... command
-pm_ui.runCommand("Color Coding...", "X coordinates", "Cyan Hot.lut")
+pm_ui.runCommand("Color Code Path(s)...", "X coordinates", "Cyan Hot.lut")
 
 # Run Path Manager's Analyze>Convert to ROIs... NB: The display properties
 # of the ROIs are set using ROIManager's "Properties" command
