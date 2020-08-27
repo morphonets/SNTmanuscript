@@ -13,6 +13,7 @@ table.appendColumn("Abbrev")
 
 for (c in scope.getChildren()) {
 	if (c.isMeshAvailable() && c.getOntologyDepth() <= maxDepth) {
+        table.appendRow()
 		table.appendToLastRow("ID", c.id())
 		table.appendToLastRow("Name", c.name())
 		table.appendToLastRow("Abbrev", c.acronym())
