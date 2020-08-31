@@ -8,7 +8,7 @@ These scripts are intended to run from a Fiji installation subscribed to the Neu
 
 ## Download
 
-To simplify execution, we provide ZIP files that pre-bundle an existing Fiji installation with all the required update-site subscriptions. The same ZIP file also contains the contents of this repository. **These self-contained ZIP files are provided here.**
+To simplify execution, we provide ZIP files that pre-bundle an existing Fiji installation with all the required update-site subscriptions. The same ZIP file also contains the contents of this repository. **These self-contained ZIP files are provided [here](https://github.com/morphonets/SNTmanuscript/releases).** 
 
 If instead you prefer to run these scripts on your local Fiji installation, please download the contents of this repository independently using this [direct link](https://github.com/morphonets/SNTmanuscript/archive/master.zip).
 
