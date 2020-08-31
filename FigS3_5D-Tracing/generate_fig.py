@@ -3,6 +3,7 @@
 
 import inspect
 import os
+import time
 import sc.fiji.snt.PathManagerUI
 
 
@@ -13,6 +14,7 @@ fig_dir = os.path.dirname(os.path.abspath(inspect.getsourcefile(lambda: 0)))
 traces_file = os.path.join(fig_dir, "traces", "mitosis.traces")
 
 snt.initialize(mitosis_img_url, True)  # Path to image, whether ui should be displayed
+time.sleep(3) # ensure GUI has been displayed
 snt.loadTracings(str(traces_file))
 
 # Set options and access the "Path Manager" dialog

@@ -1,7 +1,8 @@
 # @SNTService snt
 
-import os
 import inspect
+import os
+import time
 from ij import IJ
 from sc.fiji.snt import PathManagerUI
 
@@ -20,6 +21,7 @@ try:
 except:
     snt.initialize(True)  # image could not be retrieve. Use canvas instead
 finally:
+    time.sleep(3) # ensure GUI has been displayed
     snt.loadTracings(traces_file)
 
 # Apply Path Manager's Tag>Image Metadata> command
