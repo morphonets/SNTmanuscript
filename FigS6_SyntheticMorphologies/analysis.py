@@ -91,7 +91,7 @@ def generate_report(mat, method):
     print(str(len(snt_keys)) + " metrics used")
     
     
-def visualize_embedding(mat):
+def visualize_embedding(mat, title):
     # 3 components
     fig = plt.figure(figsize=(15, 15))
     ax = Axes3D(fig)
@@ -103,21 +103,27 @@ def visualize_embedding(mat):
     scatter = ax.scatter(mat[:,0], mat[:,1],
                          s=50, c=grn_mat, cmap=plt.get_cmap("viridis"))
     plt.legend(handles=scatter.legend_elements()[0], labels=grns)
+    plt.title(title)
+    plt.show()
 
 
 norm_snt_mat = StandardScaler().fit_transform(snt_mat)
 
+# %% SNT metrics analysis
+full_mat_snt = np.hstack([grn_mat[:, np.newaxis], norm_snt_mat])
+generate_report(full_mat_snt, "SNT")
+
 # %% tSNE analysis
 tsne_snt_mat = TSNE(n_components=3, random_state=13, perplexity=30).fit_transform(norm_snt_mat)
 full_mat_tsne = np.hstack([grn_mat[:, np.newaxis], tsne_snt_mat])
-generate_report(full_mat_tsne, "t-sne")
-visualize_embedding(tsne_snt_mat)
+generate_report(full_mat_tsne, "t-SNE")
+visualize_embedding(tsne_snt_mat, "t-SNE")
 
 # %% UMAP analysis
 umap_snt_mat = UMAP(n_components=3, random_state=13).fit_transform(norm_snt_mat)
 full_mat_umap = np.hstack([grn_mat[:, np.newaxis], umap_snt_mat])
-generate_report(full_mat_umap, "umap")
-visualize_embedding(umap_snt_mat)
+generate_report(full_mat_umap, "UMAP")
+visualize_embedding(umap_snt_mat, "UMAP")
 
 # %% PCA analysis
 pca = PCA(n_components=3)
@@ -126,5 +132,5 @@ print("Explained variance ratio: ", pca.explained_variance_ratio_)
 print("Singular values: ", pca.singular_values_)
 pca_snt_mat = pca.transform(norm_snt_mat)
 full_mat_pca = np.hstack([grn_mat[:, np.newaxis], pca_snt_mat])
-generate_report(full_mat_pca, "pca")
-visualize_embedding(pca_snt_mat)
+generate_report(full_mat_pca, "PCA")
+visualize_embedding(pca_snt_mat, "PCA")
