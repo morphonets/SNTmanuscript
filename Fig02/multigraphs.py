@@ -136,6 +136,7 @@ for cell_id in [ "AA1044", "AA0100", "AA0788" ]:
     	grouped_layout.setRadius(100)
     else:
     	grouped_layout.setRadius(0) # determine suitable radius automatically
+	grouped_layout.setCenterSource(True)
     editor.applyLayout(grouped_layout)
     editor.applyLayout(mxParallelEdgeLayout(snt_graph_adapter))  
     viewer.show()
