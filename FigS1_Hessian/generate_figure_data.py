@@ -168,10 +168,8 @@ def auto_trace(image, ref_tree, sigma, maximum, use_hessian, out_dir):
             # on the previously traced Path to fork from.
             # First, find the Path and node where the current reference Path joins to the reference Tree.
             ref_tree_fork_point = path.getStartJoinsPoint()
-            # Get the index of this reference Path which contains the fork point.
-            ref_tree_fork_path_id = path.getStartJoins().getID()
-            # Get the corresponding Path on the new Tree , since the index is the same.
-            new_tree_fork_path = new_tree.get(ref_tree_fork_path_id)
+            # Get the corresponding Path on the new Tree.
+            new_tree_fork_path = new_tree.get(ref_tree.indexOf(path.getStartJoins()))
             # Since the node coordinates on the new Tree will not correspond exactly to those in the reference Tree,
             # we need to find the closest corresponding node in the new Tree to the fork point on the reference Tree.
             closest_index = new_tree_fork_path.indexNearestTo(ref_tree_fork_point.x, ref_tree_fork_point.y,
