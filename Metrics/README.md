@@ -1,0 +1,3 @@
+## Metrics
+
+This directory contains scripts that describes the distribtuitons for all of SNT metrics computed upon the manuscript submission. It does so, by comparing the two types of mouse PT neurons from the Secondary somatomotor area with differing projection patterns described in [Winnubst et al. 2019](https://pubmed.ncbi.nlm.nih.gov/31495573/). Namely, Layer 5 PT neurons projecting to the medulla vs Layer 6 Corticothalamic PT neurons.
