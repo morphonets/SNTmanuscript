@@ -25,7 +25,7 @@ For simplicity, the analysis was split across 3 scripts:
 
 ![](heatmap.png)
 
-![](clustering.png)
+![](pca.png)
 
 ![](histplot.png)
 
