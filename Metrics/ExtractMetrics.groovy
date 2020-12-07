@@ -11,11 +11,13 @@ def measure(path, group, csvDir) {
 	dir = new File(path + group)
 	csvDir = new File(csvDir)
 	metrics = TreeAnalyzer.getAllMetrics()
+
+	// Exlude metrics not relevant for MouseLight neurons
 	metrics.remove(MultiTreeStatistics.N_PATHS)
 	metrics.remove(MultiTreeStatistics.N_FITTED_PATHS)
 	metrics.remove(MultiTreeStatistics.ASSIGNED_VALUE)
 	metrics.remove(MultiTreeStatistics.INTER_NODE_DISTANCE);
-	metrics.remove(MultiTreeStatistics.MEAN_RADIUS);  // not relevant for MouseLight neurons
+	metrics.remove(MultiTreeStatistics.MEAN_RADIUS);
 
 	table = new SNTTable()
 	for (tree in Tree.listFromDir(path + group)) {
@@ -34,12 +36,12 @@ def measure(path, group, csvDir) {
 	table.save(new File(csvDir, dir.getName() + ".csv"))
 }
 
+// Define input directory (containing SWC files)
 swcDir = "C:\\Users\\cam\\Documents\\repos\\SNTmanuscript\\Metrics\\swc\\"
-csvDir = "C:\\Users\\cam\\Documents\\repos\\SNTmanuscript\\Metrics\\csv\\"
+
+// Define output directory (where CSV files will be saved)
+csvDir = "C:\\Users\\cam\\Documents\\repos\\SNTmanuscript\\Metrics\\csv\\"
 
 measure(swcDir, "Corticothalamic", csvDir)
 measure(swcDir, "PT-Medulla", csvDir)
 measure(swcDir, "PT-Thalamus", csvDir)
-
-
-

@@ -12,11 +12,13 @@ These folder contain four scripts:
 	1. _Diagram>Layout>Circle (Grouped...)_ and choosing  _radius=400; Top-level=4; Mid-level=7; Sort mid-level compartments by weight_
 	2. _Diagram>Layout>Parallel Edges_
 
+
+
 To generate panel 2C from GUI (i.e., to perform the instructions [multigraphs.py](multigraphs.py) on the GUI), please follow the following steps:
 
 1. Open Reconstruction Viewer: (In Fiji: *Plugins>Neuroanatomy>Reconstruction Viewer*)
 2. In the newly *RV Controls* window, click on the *Neuronal Arbors* button and choose *Load from Databse>MouseLight...*, typing in the Id of the cell, e.g. `AA0100`. You may want to restrict the import to the axonal arbor only
-3. Wait for the neuron to load, and choose *Create Annotation Graph...* from the *Measure* button
+3. Wait for the neuron to load, and choose *Create Annotation Graph...* from the *Measure* button (NB: If you have many cells loaded, select the cell imported in the objects list to ensure the command does not take into account other cells)
 4. Type in the following settings:
    - Metric: `tips`
    - Threshold: `2`
@@ -39,3 +41,4 @@ To generate panel 2C from GUI (i.e., to perform the instructions [multigraphs.py
       - Sort mid-level: `checked`
       - Color by group: `unchecked` (Depending on your preference, unchecked for look of panel c))
       - Move source to center: `checked`
+6. Repeat procedure to other cells.

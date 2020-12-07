@@ -3,7 +3,9 @@ import sys
 from sc.fiji.snt import Tree
 from sc.fiji.snt.io import MouseLightLoader
 
+""" To be run From Fiji's script editor """
 
+# Define output directory (where SWC files will be saved)
 swc_dir = r"C:\Users\cam\Documents\repos\SNTmanuscript\Metrics\swc"
 if not os.path.isdir(swc_dir):
     os.mkdir(swc_dir)
