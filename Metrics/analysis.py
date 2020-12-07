@@ -7,13 +7,13 @@ from scipy import stats
 from umap import UMAP
 from sklearn.manifold import TSNE
 from sklearn.decomposition import PCA
-from sklearn.preprocessing import normalize, StandardScaler
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from scipy.cluster.hierarchy import dendrogram
 from sklearn.cluster import AgglomerativeClustering
 from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
-# %% Load csv data assumed to be in ./csv
+# Load csv data assumed to be in ./csv
 from inspect import currentframe, getframeinfo
 from pathlib import Path
 
@@ -30,7 +30,7 @@ for csv in os.listdir(csv_dir):
 
 pdata = pd.concat(data.values())
 
-# %% Extract and prepare morphometry data for analysis
+# Extract and prepare morphometry data for analysis
 
 # Extract SNT measurements, forgoing certain metrics that resulted in NaN for one cell
 snt_keys = [
@@ -54,19 +54,32 @@ group_mat = group_mat[nan_mask]
 group_labels = [group_dict_inv[group] for group in group_mat]
 snt_mat = snt_mat[nan_mask]  # remove from snt_mat last
 
-# Create the default pairplot (this is going to be massive with 37 metrics)
-# sns_plt = sns.pairplot(pd.DataFrame(data=full_mat, columns=['group']+snt_keys))
-# plt.savefig(str(parent.absolute()) + "/pairplot_v01.png")
-# plt.clf()
 
-# Create the histplots
-snt_df = pdata.drop(columns=['Description'])
-snt_long = pd.melt(snt_df, "projectionGroup", var_name="Metric")
-g = sns.FacetGrid(snt_long, hue="projectionGroup", col="Metric", col_wrap=5, sharex=False)
-g.map(plt.hist, "value", alpha=.4)
-g.add_legend()
-plt.savefig(str(parent.absolute()) + "/histplot_v01.png")
-plt.clf()
+# Create the histplot
+def plot_histplot(pdata):
+    snt_df = pdata.drop(columns=['Description'])
+    snt_long = pd.melt(snt_df, "projectionGroup", var_name="var")
+    g = sns.FacetGrid(snt_long, hue="projectionGroup", col="var", col_wrap=5, sharex=False, legend_out=True)
+    g.map(plt.hist, "value", alpha=.4)
+    g.add_legend()
+    plt.savefig(str(parent.absolute()) + '/histplot.png')
+
+
+plot_histplot(pdata)
+
+
+# Create the heatmap
+def plot_heatmap(pdata):
+    snt_df = pdata.drop(columns=["Description"])
+    snt_df = snt_df.dropna(axis="columns")
+    snt_df = snt_df.groupby(["projectionGroup"]).mean()
+    snt_df = pd.DataFrame(MinMaxScaler().fit_transform(snt_df), index=snt_df.index, columns=snt_df.columns)
+    plt.figure(figsize=(8, 15))
+    ax = sns.heatmap(snt_df.T)
+    plt.savefig(str(parent.absolute()) + '/heatmap.png', bbox_inches='tight')
+
+
+plot_heatmap(pdata)
 
 
 def ks2samp_full(group_a_id, group_b_id, mat):
@@ -89,7 +102,6 @@ def ks2samp_full(group_a_id, group_b_id, mat):
 
 
 def generate_report(mat, method):
-    # %% Generate report
     print('p-values of K-S 2-sample test on {} features combined with Fisher:'.format(method))
 
     for a in range(num_groups):
@@ -166,28 +178,24 @@ def hcluster(mat, group_labels, feature_label):
 
 norm_snt_mat = StandardScaler().fit_transform(snt_mat)
 
-# %% SNT metrics analysis
+# SNT metrics analysis
 full_mat_snt = np.hstack([group_mat[:, np.newaxis], norm_snt_mat])
 generate_report(full_mat_snt, "SNT")
-# %% clustering
 hcluster(norm_snt_mat, group_labels, "SNT metrics")
 
-# %% tSNE analysis
+# t-SNE plot
 tsne_snt_mat = TSNE(n_components=2, random_state=13).fit_transform(norm_snt_mat)
-full_mat_tsne = np.hstack([group_mat[:, np.newaxis], tsne_snt_mat])
-generate_report(full_mat_tsne, "t-SNE")
 visualize_embedding(tsne_snt_mat, "t-SNE")
-hcluster(tsne_snt_mat, group_labels, "t-SNE")
 
-# %% UMAP analysis
+# UMAP analysis
 umap_snt_mat = UMAP(n_components=20, random_state=13).fit_transform(norm_snt_mat)
 full_mat_umap = np.hstack([group_mat[:, np.newaxis], umap_snt_mat])
 generate_report(full_mat_umap, "UMAP")
 visualize_embedding(umap_snt_mat, "UMAP")
 hcluster(umap_snt_mat, group_labels, "UMAP")
 
-# %% PCA analysis
-pca = PCA(n_components=2)
+# PCA analysis
+pca = PCA(n_components=3)
 pca.fit(norm_snt_mat)
 print("Explained variance ratio: ", pca.explained_variance_ratio_)
 print("Singular values: ", pca.singular_values_)
@@ -196,5 +204,3 @@ full_mat_pca = np.hstack([group_mat[:, np.newaxis], pca_snt_mat])
 generate_report(full_mat_pca, "PCA")
 visualize_embedding(pca_snt_mat, "PCA")
 hcluster(pca_snt_mat, group_labels, "PCA")
-
-

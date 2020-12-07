@@ -35,7 +35,7 @@ pt_medulla = ['AA0012', 'AA0131', 'AA0133', 'AA0134', 'AA0169', 'AA0179', 'AA018
               'AA0788', 'AA0923']
 
 pt_thalamus = ['AA0011', 'AA0114', 'AA0115', 'AA0122', 'AA0181', 'AA0182', 'AA0245', 'AA0261',
-               'AA0415', 'AA0617', 'AA0764', 'AA0780', 'AA0792', 'AA0926', 'AA0927']
+               'AA0415', 'AA0617', 'AA0764', 'AA0780', 'AA0792', 'AA0926']
 
 retrieve_swcs(corticothalamic, "Corticothalamic")
 retrieve_swcs(pt_medulla, "PT-Medulla")
