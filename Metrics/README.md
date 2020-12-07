@@ -17,15 +17,24 @@ Two of these groups, Layer 6 CT and Layer 5 PT-Medulla are also analyzed in [Fig
 
 For simplicity, the analysis was split across 3 scripts:
 
-1. [retrieve_swcs.py](./retrieve_swcs.py) (To be run from Fiji's script editor): Downloads the reconstruction files
+1. [retrieve_swcs.py](./retrieve_swcs.py) (To be run from Fiji's script editor): Downloads (and visualizes) the reconstruction files
 2. [ExtractMetrics.groovy](./ExtractMetrics.groovy) (To be run from Fiji's script editor): Measures the downloaded files in SNT
-3. [analysis.py](./analysis.py) (To be run from a Python environment [numpy, pandas, seaborn, scipy, sklearn required]). Performs the analysis, namely:  *Features heatmap* in which each computed metrics is scaled to 0-1 range, clustering and distributions.
+3. [analysis.py](./analysis.py) (To be run from a Python environment [NB: numpy, pandas, seaborn, scipy, sklearn required]). Performs the analysis, namely:  *Features heatmap* in which each computed metrics is scaled to 0-1 range, clustering and distributions.
 
+Layer 6 CT :
+![](Corticothalamic.png)
 
+Layer 5 PT-Medulla :
+![](PT-Medulla.png)
 
+Layer 5 PT-Thalamus :
+![](PT-Thalamus.png)
+
+Heatmap:
 ![](heatmap.png)
 
+PCA:
 ![](pca.png)
 
+Distributions:
 ![](histplot.png)
-

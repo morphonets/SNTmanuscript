@@ -2,6 +2,8 @@ import os
 import sys
 from sc.fiji.snt import Tree
 from sc.fiji.snt.io import MouseLightLoader
+from sc.fiji.snt.viewer import Viewer3D
+from sc.fiji.snt.annotation import AllenUtils
 
 """ To be run From Fiji's script editor """
 
@@ -16,10 +18,19 @@ def retrieve_swcs(group_ids, group_label):
     group_dir = os.path.join(swc_dir, group_label)
     if not os.path.isdir(group_dir):
         os.mkdir(group_dir)
+    trees = []
     for id_string in group_ids:
+
         tree = MouseLightLoader(id_string).getTree()
         swc_filepath = os.path.join(group_dir, tree.getLabel() + ".swc")
         tree.saveAsSWC(swc_filepath)
+        # for simplicity, visualize all cells on a common hemisphere
+        trees.add(tree)
+        tree.setLabel(tree.getLabel() + " " + group_label)
+        if (AllenUtils.isLeftHemisphere(tree))
+            AllenUtils.assignToRightHemisphere(tree)
+    return trees
+
 
 """
 Speficy three types of mouse thalamic-projecting motor neuron with differing projection patterns
@@ -39,6 +50,15 @@ pt_medulla = ['AA0012', 'AA0131', 'AA0133', 'AA0134', 'AA0169', 'AA0179', 'AA018
 pt_thalamus = ['AA0011', 'AA0114', 'AA0115', 'AA0122', 'AA0181', 'AA0182', 'AA0245', 'AA0261',
                'AA0415', 'AA0617', 'AA0764', 'AA0780', 'AA0792', 'AA0926']
 
-retrieve_swcs(corticothalamic, "Corticothalamic")
-retrieve_swcs(pt_medulla, "PT-Medulla")
-retrieve_swcs(pt_thalamus, "PT-Thalamus")
+ct_trees = retrieve_swcs(corticothalamic, "Corticothalamic")
+ptm_trees = retrieve_swcs(pt_medulla, "PT-Medulla")
+ptt_trees = retrieve_swcs(pt_thalamus, "PT-Thalamus")
+
+# Display groups
+viewer = Viewer3D()
+viewer.addTrees(ct_trees, "#430753")
+viewer.addTrees(ptm_trees, "#29908b")
+viewer.addTrees(ptt_trees, "#fce540")
+viewer.loadRefBrain("mouse")
+viewer.show()
+
