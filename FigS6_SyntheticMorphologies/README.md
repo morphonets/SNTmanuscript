@@ -20,3 +20,16 @@ NB:
 - Retrieved metrics are included in  [csv/](./csv)
 - The 5,000 morphologies account for more than 300MB of data and were not included in this repository, but exemplars are included in [swc/](./swc)
 
+
+
+Below some of the outputs of [analysis.py](./analysis.py):
+
+
+
+Metrics matrix for all GRNs:
+![](heatmap.png)
+
+
+
+Distributions of metrics across all GRNs:
+![](histplot.png)
