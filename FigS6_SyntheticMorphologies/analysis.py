@@ -40,7 +40,7 @@ snt_keys = [k for k in pdata.keys() if k != 'filenameGRN' and k != 'Description'
 # Obtain the set of strings of the 5 GRN types
 grns = sorted(list(set(pdata['filenameGRN'])))
 num_grns = len(grns)
-# Dictionary that maps grn filenames to an integer GRN uid
+# Dictionary that maps GRN filenames to an integer GRN uid
 grn_dict = dict(zip(grns, range(num_grns)))
 
 # Define numpy matrices
@@ -58,7 +58,7 @@ snt_mat = snt_mat[nan_mask]
 def plot_histplot(pdata):
     # Remove the non-metric values from the dataframe
     snt_df = pdata.drop(columns=['Description'])
-    # Unpivot the dataframe to long format using projection group as the identifier variable,
+    # Unpivot the dataframe to long format using GRN type as the identifier variable,
     # leaving all other columns as the measured variables
     snt_long = pd.melt(snt_df, "filenameGRN", var_name="var")
     g = sns.FacetGrid(snt_long, hue="filenameGRN", col="var", col_wrap=5, sharex=False, legend_out=True)
