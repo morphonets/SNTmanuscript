@@ -72,13 +72,15 @@ plot_histplot(pdata)
 
 # Create the heatmap
 def plot_heatmap(pdata):
-    snt_df = pdata.drop(columns=['Description'])
-    snt_df = snt_df.dropna(axis="columns")
-    # Aggregate each GRN type using the mean value of each metric across all observations
-    snt_df = snt_df.groupby(["filenameGRN"]).mean()
-    # Scale the values of each metric by the min-max value across the GRNs, so that all metrics
+    snt_df = pdata.dropna(axis="columns")
+    filename_grn = snt_df["filenameGRN"]
+    snt_df = pdata.drop(columns=["Description", "filenameGRN"])
+    # Scale the values of each metric by the min-max value across all observations, so that all metrics
     # are in the same range [0, 1]
     snt_df = pd.DataFrame(MinMaxScaler().fit_transform(snt_df), index=snt_df.index, columns=snt_df.columns)
+    snt_df["filenameGRN"] = filename_grn
+    # Aggregate each GRN type using the mean value of each scaled metric across all observations
+    snt_df = snt_df.groupby(["filenameGRN"]).mean()
     plt.figure(figsize=(8, 15))
     ax = sns.heatmap(snt_df.T)
     plt.savefig(str(parent.absolute()) + '/heatmap.png', bbox_inches='tight')
