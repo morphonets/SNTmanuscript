@@ -6,7 +6,7 @@ This directory contains scripts that describes the distributions of all of SNT m
 - Group 2: Layer 5 PT neurons projecting to the Medulla 
 - Group 3: Layer 5 PT neurons projecting to the Thalamus
 
-Two of these groups, Layer 6 CT and Layer 5 PT-Medulla are also analyzed in [Fig. S7](./FigS7_PopulationDiagrams/). The MouseLight IDs of the cells are as follows:
+Selected cells from these groups, Layer 6 CT and Layer 5 PT are also analyzed in [Fig. S7](./FigS7_PopulationDiagrams/). The MouseLight IDs of the cells are as follows:
 
 | Layer 6 CT                                                                                                                                                                 | Layer 5 PT-Medulla                                                                   | Layer 5 PT-Thalamus                                                                                                             |
 |----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------|

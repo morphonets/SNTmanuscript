@@ -11,7 +11,6 @@ from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from scipy.cluster.hierarchy import dendrogram
 from sklearn.cluster import AgglomerativeClustering
 from matplotlib import pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 
 # Load csv data assumed to be in ./csv
 from inspect import currentframe, getframeinfo
@@ -21,18 +20,19 @@ filename = getframeinfo(currentframe()).filename
 parent = Path(filename).resolve().parent
 csv_dir = str(parent.joinpath('csv').absolute())
 
+# Read each metric csv file into a dictionary, with projection group as key
 data = {}
-
 for csv in os.listdir(csv_dir):
     filename = os.path.join(csv_dir, csv)
     pdata = pd.read_csv(filename, sep=',')
     data[filename] = pdata
 
+# Concatenate the dictionary items into a single dataframe
 pdata = pd.concat(data.values())
 
 # Extract and prepare morphometry data for analysis
 
-# Extract SNT measurements, forgoing certain metrics that resulted in NaN for one cell
+# Extract SNT measurements, forgoing certain metrics that resulted in NaN for one cell, AA0115
 snt_keys = [
     k for k in pdata.keys() if k != "projectionGroup"
                                and k != "Description"
@@ -40,24 +40,30 @@ snt_keys = [
                                and k != "Sholl: Max (fitted) radius"
                                and k != "Sholl: Degree of Polynomial fit"
 ]
+# Obtain the set of strings of the 3 projection groups
 groups = sorted(list(set(pdata['projectionGroup'])))
 num_groups = len(groups)
-# Dictionary that maps grn filenames to an integer group uid
+# Dictionary that maps group filenames to an integer group uid
 group_dict = dict(zip(groups, range(num_groups)))
+# Invert the dictionary to map the integer group id -> projection group string
 group_dict_inv = {v: k for k, v in group_dict.items()}
 # Define numpy matrices
 snt_mat = pdata[snt_keys].to_numpy()  # Matrix of SNT measurements
+# Vector of group ids to associate with the metrics vector for each observed cell
 group_mat = np.array([group_dict[group] for group in pdata['projectionGroup']])
 # Remove all entries with nan's
 nan_mask = ~np.isnan(snt_mat).any(axis=1)
 group_mat = group_mat[nan_mask]
 group_labels = [group_dict_inv[group] for group in group_mat]
-snt_mat = snt_mat[nan_mask]  # remove from snt_mat last
+snt_mat = snt_mat[nan_mask]
 
 
 # Create the histplot
 def plot_histplot(pdata):
+    # Remove the neuron id string from the dataframe
     snt_df = pdata.drop(columns=['Description'])
+    # Unpivot the dataframe to long format using projection group as the identifier variable,
+    # leaving all other columns as the measured variables.
     snt_long = pd.melt(snt_df, "projectionGroup", var_name="var")
     g = sns.FacetGrid(snt_long, hue="projectionGroup", col="var", col_wrap=5, sharex=False, legend_out=True)
     g.map(plt.hist, "value", alpha=.4)
@@ -72,7 +78,10 @@ plot_histplot(pdata)
 def plot_heatmap(pdata):
     snt_df = pdata.drop(columns=["Description"])
     snt_df = snt_df.dropna(axis="columns")
+    # Aggregate each projection group using the mean value of each metric across all observations
     snt_df = snt_df.groupby(["projectionGroup"]).mean()
+    # Scale the values of each metric by the min-max value across the projection groups, so that all metrics
+    # are in the same range [0, 1]
     snt_df = pd.DataFrame(MinMaxScaler().fit_transform(snt_df), index=snt_df.index, columns=snt_df.columns)
     plt.figure(figsize=(8, 15))
     ax = sns.heatmap(snt_df.T)
@@ -83,11 +92,12 @@ plot_heatmap(pdata)
 
 
 def ks2samp_full(group_a_id, group_b_id, mat):
+    # Compute the 2-sample Kolmogorov-Smirnov test
     warnings.filterwarnings("ignore")
-
+    # Only compare the observations for the two projection groups of interest
     group_a_mask = np.array([True if group == group_a_id else False for group in group_mat])
     group_b_mask = np.array([True if group == group_b_id else False for group in group_mat])
-
+    # Ignore column 0 since it holds the projection group integer ids
     snt_mat_a = mat[group_a_mask, 1:]
     snt_mat_b = mat[group_b_mask, 1:]
 
@@ -96,12 +106,14 @@ def ks2samp_full(group_a_id, group_b_id, mat):
         test_result = stats.ks_2samp(snt_mat_a[:, pid], snt_mat_b[:, pid])
         pvalues += [test_result.pvalue]
 
-    # combine pvalues to conclude about singular hypothesis
+    # Combine pvalues to conclude about singular hypothesis
     combined_pvalue = stats.combine_pvalues(pvalues, method='fisher')
     return combined_pvalue[1]
 
 
 def generate_report(mat, method):
+    # Conduct the 2-sample K-S test on all projection groups against each other (ignoring same-group comparisons)
+    # and print the p-values.
     print('p-values of K-S 2-sample test on {} features combined with Fisher:'.format(method))
 
     for a in range(num_groups):
@@ -124,11 +136,7 @@ def generate_report(mat, method):
 
 
 def visualize_embedding(mat, title):
-    # 3 components
-    # fig = plt.figure(figsize=(15, 15))
-    # ax = Axes3D(fig)
-    # scatter = ax.scatter(mat[:, 0], mat[:, 1], mat[:, 2],
-    #                      s=50, c=group_mat, cmap=plt.get_cmap("viridis"))
+    # Plot the first two components of the dimension-reduced metrics array
 
     # 2 components
     fig, ax = plt.subplots(figsize=(10, 10))
@@ -138,7 +146,7 @@ def visualize_embedding(mat, title):
     )
     plt.legend(
         handles=scatter.legend_elements()[0],
-        labels=[os.path.basename(os.path.normpath(group)) for group in groups]
+        labels=[group for group in groups]
     )
     plt.title(title)
     plt.show()
@@ -171,16 +179,20 @@ def hcluster(mat, group_labels, feature_label):
     model = model.fit(mat)
     fig, ax = plt.subplots(figsize=(10, 13))
     plt.title('{}: Hierarchical Clustering Dendrogram'.format(feature_label))
-    # plot the top three levels of the dendrogram
     plot_dendrogram(model, group_labels)
     plt.show()
 
 
+# Standardize features by removing the mean and scaling to unit variance
 norm_snt_mat = StandardScaler().fit_transform(snt_mat)
 
 # SNT metrics analysis
+# Concatenate the integer projection group id for each observation with the observed measurements array
+# along the horizontal axis.
 full_mat_snt = np.hstack([group_mat[:, np.newaxis], norm_snt_mat])
+# Print the values of the 2-sample K-S test
 generate_report(full_mat_snt, "SNT")
+# Plot the hierarchical clustering dendrogram
 hcluster(norm_snt_mat, group_labels, "SNT metrics")
 
 # t-SNE plot
